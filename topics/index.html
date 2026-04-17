@@ -11,6 +11,7 @@
   <a href="../index.html" class="brand">ai-knowledge</a>
   <a href="../daily/index.html" class="link">📅 Daily</a>
   <a href="./index.html" class="link">📚 Topics</a>
+  <a href="../graph/global/graph.html" class="link">🌐 Graph</a>
   <span class="spacer"></span>
 </nav>
 <header class="hero">
@@ -20,21 +21,43 @@
 <main class="container">
 
   <section>
-    <h2>📚 主题</h2>
-    <div class="graph-empty">
-      <div class="glyph">📭</div>
-      <p>主题库还是空的。<br>从 <a href="../daily/index.html" style="color:var(--accent-2)">Daily 简报</a> 选论文入库,或直接告诉我"入库 &lt;arxiv-id&gt; 到 &lt;主题&gt;"。</p>
+    <h2>🌐 全局图谱(所有主题合并)</h2>
+    <iframe class="graph-frame" src="../graph/global/graph.html" style="height:500px"></iframe>
+  </section>
+
+  <section>
+    <h2>📚 活跃主题</h2>
+    <div class="grid">
+
+      <a class="card" href="./video/index.html">
+        <div class="meta"><span class="chip gradient">video</span><span class="chip">1 paper</span></div>
+        <h3>🎬 Video Generation</h3>
+        <p>视频生成、世界模型、Diffusion video。</p>
+        <div class="why">最新: Seedance 2.0(ByteDance,统一多模态音视频架构)</div>
+      </a>
+
+      <a class="card" href="./agents/index.html">
+        <div class="meta"><span class="chip gradient">agents</span><span class="chip">1 paper</span></div>
+        <h3>🤖 Agents</h3>
+        <p>GUI Agent、tool use、autonomous workflows。</p>
+        <div class="why">最新: ClawGUI(训练 + 评测 + 部署一体化)</div>
+      </a>
+
+      <a class="card" href="./multimodal/index.html">
+        <div class="meta"><span class="chip gradient">multimodal</span><span class="chip">1 paper</span></div>
+        <h3>🖼️ Multimodal</h3>
+        <p>VLM、视觉理解、多模态生成。</p>
+        <div class="why">最新: RationalRewards(reasoning reward 同时 scale 训练 + test-time)</div>
+      </a>
+
     </div>
   </section>
 
   <section>
-    <h2>🗂️ 计划主题(待建)</h2>
+    <h2>🗂️ 计划中(待建)</h2>
     <div class="grid">
-      <div class="card"><h3>🎬 video</h3><p>视频生成、世界模型、Diffusion video</p></div>
-      <div class="card"><h3>🤖 agents</h3><p>GUI Agent、tool use、autonomous workflows</p></div>
       <div class="card"><h3>🎯 rl</h3><p>RLHF、reward design、long-horizon RL</p></div>
       <div class="card"><h3>🧠 reasoning</h3><p>CoT、推测解码、long-context reasoning</p></div>
-      <div class="card"><h3>🖼️ multimodal</h3><p>VLM、视觉理解、多模态生成</p></div>
       <div class="card"><h3>⚡ inference</h3><p>推理加速、KV cache、量化</p></div>
       <div class="card"><h3>🛡️ alignment</h3><p>对齐、安全、unlearning</p></div>
       <div class="card"><h3>🌍 world-model</h3><p>世界模型、embodied AI</p></div>
