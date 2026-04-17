@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard · AI Knowledge</title>
+<link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+<nav class="nav">
+  <a href="./index.html" class="brand">ai-knowledge</a>
+  <a href="./index.html" class="link">📅 Today</a>
+  <a href="./daily/index.html" class="link">📜 Archive</a>
+  <a href="./topics/index.html" class="link">📚 Topics</a>
+  <a href="./graph/global/graph.html" class="link">🌐 Graph</a>
+  <a href="./dashboard.html" class="link">🏠 Dashboard</a>
+  <span class="spacer"></span>
+  <span class="chip mono">v0.2</span>
+</nav>
+
+<header class="hero">
+  <h1>AI Knowledge Base</h1>
+  <p class="sub">个人 AI 论文 · 新闻 · 知识图谱 · 由 graphify 驱动</p>
+</header>
+
+<main class="container">
+
+  <section>
+    <div class="stats">
+      <div class="stat"><div class="num">3</div><div class="label">Papers</div></div>
+      <div class="stat"><div class="num">3</div><div class="label">Topics</div></div>
+      <div class="stat"><div class="num">1</div><div class="label">Daily Issues</div></div>
+      <div class="stat"><div class="num">117</div><div class="label">Graph Nodes</div></div>
+      <div class="stat"><div class="num">15</div><div class="label">Communities</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>🌐 全局知识图谱</h2>
+    <iframe class="graph-frame" src="./graph/global/graph.html" title="Global knowledge graph"></iframe>
+    <p style="color:var(--fg-3);font-size:.85rem;margin-top:.75rem">15 社区:Seedance 模型谱系 / Visual Editing Benchmarks / RL Methods (GRPO Family) / ClawGUI Training Infra / GUI Agent Benchmarks / GUI Agent Components / Seedance 2.0 Architecture / Reasoning Reward Models · <a href="./graph/global/graph.html" style="color:var(--accent-2)">在新标签打开 →</a></p>
+  </section>
+
+  <section>
+    <h2>🚪 入口</h2>
+    <div class="entries">
+      <a class="entry" href="./daily/index.html">
+        <div class="icon">📅</div>
+        <h3>Daily 简报</h3>
+        <p class="desc">每日 / 每周 AI 必读速递,从 HuggingFace Trending + 大厂事件汇总。</p>
+        <div class="preview">最新: 2026-04-17 · Seedance 2.0 / ClawGUI / Opus 4.7 ...</div>
+      </a>
+      <a class="entry" href="./topics/index.html">
+        <div class="icon">📚</div>
+        <h3>Topics 主题库</h3>
+        <p class="desc">按主题组织的论文库,每个主题包含合并的知识图谱与论文卡片。</p>
+        <div class="preview">3 主题: video · agents · multimodal</div>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>🔥 跨论文洞察 (graphify Surprising Connections)</h2>
+    <ul class="news">
+      <li><span class="badge-news">桥接</span><div><strong>DiffusionNFT ↔ Seedance 2.0</strong><span class="desc">RationalRewards 的 RL 方法与 Seedance 视频生成共享底层 diffusion 优化思路 [INFERRED]</span></div></li>
+      <li><span class="badge-news">桥接</span><div><strong>MLLM-as-Judge ↔ RationalRewards</strong><span class="desc">ClawGUI 用 MLLM 做判分,与 RationalRewards 的 reasoning reward 范式同源 [INFERRED]</span></div></li>
+      <li><span class="badge-news">桥接</span><div><strong>Process Reward Model (PRM) ↔ RationalRewards</strong><span class="desc">两篇论文都基于 PRM,但应用于不同模态(GUI vs 视觉生成)[INFERRED]</span></div></li>
+      <li><span class="badge-news">桥接</span><div><strong>Seed-VL ↔ Qwen3-VL</strong><span class="desc">Seedance 与 ClawGUI 都用大型 VL 主干,Seed-VL 与 Qwen3-VL 在能力定位上相近 [INFERRED]</span></div></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🕒 最近活动</h2>
+    <ul class="timeline">
+      <li>
+        <span class="when">2026-04-17 14:22</span>
+        <span class="what">🌐 graphify 全局图谱完成 · 117 节点 / 119 边 / 15 社区(3 篇论文)</span>
+      </li>
+      <li>
+        <span class="when">2026-04-17 14:18</span>
+        <span class="what">📥 入库 3 篇 · Seedance 2.0 · ClawGUI · RationalRewards</span>
+      </li>
+      <li>
+        <span class="when">2026-04-17 14:07</span>
+        <span class="what">📅 生成今日简报 <a href="./daily/2026-04-17.html" style="color:var(--accent-2)">2026-04-17</a></span>
+      </li>
+      <li>
+        <span class="when">2026-04-17 14:07</span>
+        <span class="what">🏗️ 知识库初始化</span>
+      </li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  Generated 2026-04-17 14:22 ·
+  <code>/ai-daily</code> 今日简报 · <code>/ai-daily topic &lt;name&gt;</code> 进主题 · <code>/graphify &lt;path&gt;</code> 入库
+</footer>
+</body>
+</html>

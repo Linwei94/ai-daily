@@ -69,12 +69,40 @@ section h2::before{content:"";width:3px;height:1.1em;background:var(--gradient);
 .timeline .what{color:var(--fg);font-size:.92rem}
 
 /* news list */
-.news{list-style:none;display:flex;flex-direction:column;gap:.75rem}
-.news li{padding:1rem 1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1rem;align-items:flex-start;transition:border-color .15s}
-.news li:hover{border-color:var(--border-hover)}
-.news .badge-news{font-size:.7rem;padding:.2rem .55rem;background:var(--surface-2);border-radius:4px;color:var(--accent-3);font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;margin-top:.15rem}
-.news strong{color:var(--fg);font-weight:600}
-.news .desc{color:var(--fg-2);font-size:.88rem;margin-top:.25rem;display:block}
+.news{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.news li{padding:.85rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:.85rem;align-items:flex-start;transition:border-color .15s,box-shadow .15s}
+.news li:hover{border-color:var(--border-hover);box-shadow:var(--shadow)}
+.news .brand-icon{width:32px;height:32px;border-radius:6px;flex-shrink:0;padding:5px;background:var(--surface-2);object-fit:contain}
+.news .brand-icon[data-brand="anthropic"]{background:#faf0ec}
+.news .brand-icon[data-brand="openai"]{background:#f0f0f0}
+.news .brand-icon[data-brand="google"]{background:#fff}
+.news .brand-icon[data-brand="meta"]{background:#eef4ff}
+.news .brand-icon[data-brand="bytedance"]{background:#f0f0f0}
+.news .brand-icon[data-brand="business"]{background:#f4f1e8;font-size:18px;display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.news .body{flex:1;min-width:0}
+.news strong{color:var(--fg);font-weight:600;display:block;font-size:.95rem}
+.news .desc{color:var(--fg-2);font-size:.85rem;margin-top:.2rem;display:block;line-height:1.55}
+.news .when{color:var(--fg-3);font-size:.75rem;font-family:ui-monospace,monospace;margin-left:.4rem;font-weight:400}
+
+/* paper list (replaces grid for readable rows) */
+.paper-list{display:flex;flex-direction:column;gap:.85rem}
+.paper-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;transition:border-color .15s,box-shadow .15s,transform .15s;animation:fadeUp .5s ease backwards;display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:start}
+.paper-row:hover{border-color:var(--border-hover);box-shadow:var(--shadow);transform:translateY(-1px)}
+.paper-row .rank-col{display:flex;flex-direction:column;align-items:center;gap:.4rem;flex-shrink:0;width:48px}
+.paper-row .rank-num{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--gradient);color:#fff;font-weight:700;border-radius:50%;font-size:1rem;font-family:ui-monospace,monospace}
+.paper-row .rank-tag{font-size:.62rem;color:var(--fg-3);text-transform:uppercase;letter-spacing:.05em;text-align:center}
+.paper-row .body{min-width:0}
+.paper-row .meta-row{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.4rem}
+.paper-row h3{font-size:1.05rem;font-weight:600;line-height:1.4;margin-bottom:.5rem}
+.paper-row h3 a{color:var(--fg)}
+.paper-row h3 a:hover{color:var(--accent-2)}
+.paper-row .summary{color:var(--fg-2);font-size:.9rem;margin-bottom:.5rem;line-height:1.6}
+.paper-row .details{color:var(--fg-2);font-size:.85rem;margin-bottom:.5rem;line-height:1.6}
+.paper-row .details strong{color:var(--fg);font-weight:600}
+.paper-row .why{color:var(--fg-3);font-size:.82rem;padding:.5rem .75rem;background:var(--surface-2);border-radius:6px;border-left:3px solid var(--accent);margin-top:.6rem;line-height:1.55}
+.paper-row .actions{margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap}
+.paper-row .actions a{font-size:.75rem;padding:.3rem .7rem;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;color:var(--fg-2);transition:all .15s}
+.paper-row .actions a:hover{border-color:var(--accent-2);color:var(--accent-2);background:#fff}
 
 /* hero stat cards */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin:2rem 0}
