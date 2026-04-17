@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>graphify - /home/linwei/ai-knowledge/graph/video/graph.html</title>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f1a; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; height: 100vh; overflow: hidden; }
+  #graph { flex: 1; }
+  #sidebar { width: 280px; background: #1a1a2e; border-left: 1px solid #2a2a4e; display: flex; flex-direction: column; overflow: hidden; }
+  #search-wrap { padding: 12px; border-bottom: 1px solid #2a2a4e; }
+  #search { width: 100%; background: #0f0f1a; border: 1px solid #3a3a5e; color: #e0e0e0; padding: 7px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+  #search:focus { border-color: #4E79A7; }
+  #search-results { max-height: 140px; overflow-y: auto; padding: 4px 12px; border-bottom: 1px solid #2a2a4e; display: none; }
+  .search-item { padding: 4px 6px; cursor: pointer; border-radius: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .search-item:hover { background: #2a2a4e; }
+  #info-panel { padding: 14px; border-bottom: 1px solid #2a2a4e; min-height: 140px; }
+  #info-panel h3 { font-size: 13px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  #info-content { font-size: 13px; color: #ccc; line-height: 1.6; }
+  #info-content .field { margin-bottom: 5px; }
+  #info-content .field b { color: #e0e0e0; }
+  #info-content .empty { color: #555; font-style: italic; }
+  .neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #333; }
+  .neighbor-link:hover { background: #2a2a4e; }
+  #neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
+  #legend-wrap { flex: 1; overflow-y: auto; padding: 12px; }
+  #legend-wrap h3 { font-size: 13px; color: #aaa; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: 4px; font-size: 12px; }
+  .legend-item:hover { background: #2a2a4e; padding-left: 4px; }
+  .legend-item.dimmed { opacity: 0.35; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .legend-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend-count { color: #666; font-size: 11px; }
+  #stats { padding: 10px 14px; border-top: 1px solid #2a2a4e; font-size: 11px; color: #555; }
+</style>
+</head>
+<body>
+<div id="graph"></div>
+<div id="sidebar">
+  <div id="search-wrap">
+    <input id="search" type="text" placeholder="Search nodes..." autocomplete="off">
+    <div id="search-results"></div>
+  </div>
+  <div id="info-panel">
+    <h3>Node Info</h3>
+    <div id="info-content"><span class="empty">Click a node to inspect it</span></div>
+  </div>
+  <div id="legend-wrap">
+    <h3>Communities</h3>
+    <div id="legend"></div>
+  </div>
+  <div id="stats">38 nodes &middot; 36 edges &middot; 7 communities</div>
+</div>
+<script>
+const RAW_NODES = [{"id": "seedance_i2v", "label": "Image-to-Video (I2V)", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Image-to-Video (I2V)", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_r2v", "label": "Reference-to-Video (R2V)", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Reference-to-Video (R2V)", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_doubao", "label": "Doubao", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Doubao", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_style_transfer", "label": "Style Transfer", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "Style Transfer", "community": 10, "community_name": "Community 10", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 0}, {"id": "rationalrewards_model", "label": "RationalRewards Model (8B)", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 13.9, "font": {"size": 0, "color": "#ffffff"}, "title": "RationalRewards Model (8B)", "community": 1, "community_name": "Community 1", "source_file": "topics/multimodal/2604.11626-rationalrewards/paper.md", "file_type": "paper", "degree": 3}, {"id": "rationalrewards_qwen3_vl_8b", "label": "Qwen3-VL-Instruct-8B (backbone)", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 13.9, "font": {"size": 0, "color": "#ffffff"}, "title": "Qwen3-VL-Instruct-8B (backbone)", "community": 6, "community_name": "Community 6", "source_file": "topics/multimodal/2604.11626-rationalrewards/paper.md", "file_type": "paper", "degree": 3}, {"id": "seedance_2_0", "label": "Seedance 2.0", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Seedance 2.0", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 23}, {"id": "seedance_1_5_pro", "label": "Seedance 1.5 Pro", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Seedance 1.5 Pro", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_arena_ai", "label": "Arena.AI (formerly LMArena)", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Arena.AI (formerly LMArena)", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "rationalrewards_diffusion_nft", "label": "DiffusionNFT", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 12.6, "font": {"size": 0, "color": "#ffffff"}, "title": "DiffusionNFT", "community": 1, "community_name": "Community 1", "source_file": "topics/multimodal/2604.11626-rationalrewards/paper.md", "file_type": "paper", "degree": 2}, {"id": "seedance_seed_vl", "label": "Seed-VL multimodal vision-language model", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 13.9, "font": {"size": 0, "color": "#ffffff"}, "title": "Seed-VL multimodal vision-language model", "community": 6, "community_name": "Community 6", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 3}, {"id": "seedance_binaural_audio", "label": "Binaural Audio Generation", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Binaural Audio Generation", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_1_0", "label": "Seedance 1.0", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Seedance 1.0", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_kling_3_0", "label": "Kling 3.0", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Kling 3.0", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_volcano_engine", "label": "Volcano Engine", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Volcano Engine", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_audio_visual_sync", "label": "Audio-Visual Sync Metric", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Audio-Visual Sync Metric", "community": 6, "community_name": "Community 6", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_sora_2_pro", "label": "Sora 2 Pro", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Sora 2 Pro", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_fvd_clipscore", "label": "FVD / CLIPScore", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "FVD / CLIPScore", "community": 11, "community_name": "Community 11", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 0}, {"id": "seedance_video_editing", "label": "Video Editing", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Video Editing", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_vidu_q2_pro", "label": "Vidu Q2 Pro", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Vidu Q2 Pro", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_bytedance_seed", "label": "ByteDance Seed Team", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 13.9, "font": {"size": 0, "color": "#ffffff"}, "title": "ByteDance Seed Team", "community": 6, "community_name": "Community 6", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 3}, {"id": "seedance_narrative_quality", "label": "Narrative Quality Evaluation", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 12.6, "font": {"size": 0, "color": "#ffffff"}, "title": "Narrative Quality Evaluation", "community": 6, "community_name": "Community 6", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 2}, {"id": "seedance_2_0_fast", "label": "Seedance 2.0 Fast", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Seedance 2.0 Fast", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_wan_2_6", "label": "Wan 2.6", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Wan 2.6", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_veo_3_1", "label": "Veo 3.1", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Veo 3.1", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_paper", "label": "Seedance 2.0 (Paper)", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 13.9, "font": {"size": 0, "color": "#ffffff"}, "title": "Seedance 2.0 (Paper)", "community": 6, "community_name": "Community 6", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 3}, {"id": "seedance_multimodal_audiovideo", "label": "Native Multimodal Audio-Video Generation", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Native Multimodal Audio-Video Generation", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_jimeng", "label": "Jimeng", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Jimeng", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_kling_2_6", "label": "Kling 2.6", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Kling 2.6", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_seedvideobench_2", "label": "SeedVideoBench 2.0", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 15.2, "font": {"size": 12, "color": "#ffffff"}, "title": "SeedVideoBench 2.0", "community": 6, "community_name": "Community 6", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 4}, {"id": "seedance_motion_manipulation", "label": "Motion Manipulation", "color": {"background": "#BAB0AC", "border": "#BAB0AC", "highlight": {"background": "#ffffff", "border": "#BAB0AC"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "Motion Manipulation", "community": 9, "community_name": "Community 9", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 0}, {"id": "seedance_video_extension", "label": "Video Extension", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Video Extension", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "clawgui_qwen3_vl", "label": "Qwen3-VL", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 12.6, "font": {"size": 0, "color": "#ffffff"}, "title": "Qwen3-VL", "community": 6, "community_name": "Community 6", "source_file": "topics/agents/2604.11784-clawgui/paper.md", "file_type": "paper", "degree": 2}, {"id": "seedance_t2v", "label": "Text-to-Video (T2V)", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Text-to-Video (T2V)", "community": 0, "community_name": "Community 0", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_cinematographic_lang", "label": "Cinematographic Language", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Cinematographic Language", "community": 6, "community_name": "Community 6", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_motion_quality_metric", "label": "Motion Quality Evaluation Dimension", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Motion Quality Evaluation Dimension", "community": 6, "community_name": "Community 6", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_seedream", "label": "Seedream image generation series", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 11.3, "font": {"size": 0, "color": "#ffffff"}, "title": "Seedream image generation series", "community": 6, "community_name": "Community 6", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 1}, {"id": "seedance_subject_control", "label": "Subject Control", "color": {"background": "#9C755F", "border": "#9C755F", "highlight": {"background": "#ffffff", "border": "#9C755F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "Subject Control", "community": 8, "community_name": "Community 8", "source_file": "topics/video/2604.14148-seedance-2/paper.md", "file_type": "paper", "degree": 0}];
+const RAW_EDGES = [{"from": "seedance_i2v", "to": "seedance_2_0", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_r2v", "to": "seedance_2_0", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_doubao", "to": "seedance_2_0", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "rationalrewards_model", "to": "seedance_2_0", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "rationalrewards_model", "to": "rationalrewards_qwen3_vl_8b", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "rationalrewards_model", "to": "rationalrewards_diffusion_nft", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "rationalrewards_qwen3_vl_8b", "to": "seedance_seed_vl", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "rationalrewards_qwen3_vl_8b", "to": "clawgui_qwen3_vl", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "seedance_2_0", "to": "seedance_paper", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_2_0_fast", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_1_5_pro", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_1_0", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_multimodal_audiovideo", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_binaural_audio", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_t2v", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_arena_ai", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_kling_2_6", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_kling_3_0", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_sora_2_pro", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_veo_3_1", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_wan_2_6", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_vidu_q2_pro", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_jimeng", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_volcano_engine", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_video_editing", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "seedance_video_extension", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_2_0", "to": "rationalrewards_diffusion_nft", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "seedance_seed_vl", "to": "seedance_bytedance_seed", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_seed_vl", "to": "clawgui_qwen3_vl", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "seedance_audio_visual_sync", "to": "seedance_seedvideobench_2", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_bytedance_seed", "to": "seedance_paper", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_bytedance_seed", "to": "seedance_seedream", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_narrative_quality", "to": "seedance_seedvideobench_2", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_narrative_quality", "to": "seedance_cinematographic_lang", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_paper", "to": "seedance_seedvideobench_2", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "seedance_seedvideobench_2", "to": "seedance_motion_quality_metric", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}];
+const LEGEND = [];
+
+// HTML-escape helper — prevents XSS when injecting graph data into innerHTML
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// Build vis datasets
+const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
+  id: n.id, label: n.label, color: n.color, size: n.size,
+  font: n.font, title: n.title,
+  _community: n.community, _community_name: n.community_name,
+  _source_file: n.source_file, _file_type: n.file_type, _degree: n.degree,
+})));
+
+const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
+  id: i, from: e.from, to: e.to,
+  label: '',
+  title: e.title,
+  dashes: e.dashes,
+  width: e.width,
+  color: e.color,
+  arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+})));
+
+const container = document.getElementById('graph');
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  physics: {
+    enabled: true,
+    solver: 'forceAtlas2Based',
+    forceAtlas2Based: {
+      gravitationalConstant: -60,
+      centralGravity: 0.005,
+      springLength: 120,
+      springConstant: 0.08,
+      damping: 0.4,
+      avoidOverlap: 0.8,
+    },
+    stabilization: { iterations: 200, fit: true },
+  },
+  interaction: {
+    hover: true,
+    tooltipDelay: 100,
+    hideEdgesOnDrag: true,
+    navigationButtons: false,
+    keyboard: false,
+  },
+  nodes: { shape: 'dot', borderWidth: 1.5 },
+  edges: { smooth: { type: 'continuous', roundness: 0.2 }, selectionWidth: 3 },
+});
+
+network.once('stabilizationIterationsDone', () => {
+  network.setOptions({ physics: { enabled: false } });
+});
+
+function showInfo(nodeId) {
+  const n = nodesDS.get(nodeId);
+  if (!n) return;
+  const neighborIds = network.getConnectedNodes(nodeId);
+  const neighborItems = neighborIds.map(nid => {
+    const nb = nodesDS.get(nid);
+    const color = nb ? nb.color.background : '#555';
+    return `<span class="neighbor-link" style="border-left-color:${esc(color)}" onclick="focusNode(${JSON.stringify(nid)})">${esc(nb ? nb.label : nid)}</span>`;
+  }).join('');
+  document.getElementById('info-content').innerHTML = `
+    <div class="field"><b>${esc(n.label)}</b></div>
+    <div class="field">Type: ${esc(n._file_type || 'unknown')}</div>
+    <div class="field">Community: ${esc(n._community_name)}</div>
+    <div class="field">Source: ${esc(n._source_file || '-')}</div>
+    <div class="field">Degree: ${n._degree}</div>
+    ${neighborIds.length ? `<div class="field" style="margin-top:8px;color:#aaa;font-size:11px">Neighbors (${neighborIds.length})</div><div id="neighbors-list">${neighborItems}</div>` : ''}
+  `;
+}
+
+function focusNode(nodeId) {
+  network.focus(nodeId, { scale: 1.4, animation: true });
+  network.selectNodes([nodeId]);
+  showInfo(nodeId);
+}
+
+// Track hovered node — hover detection is more reliable than click params
+let hoveredNodeId = null;
+network.on('hoverNode', params => {
+  hoveredNodeId = params.node;
+  container.style.cursor = 'pointer';
+});
+network.on('blurNode', () => {
+  hoveredNodeId = null;
+  container.style.cursor = 'default';
+});
+container.addEventListener('click', () => {
+  if (hoveredNodeId !== null) {
+    showInfo(hoveredNodeId);
+    network.selectNodes([hoveredNodeId]);
+  }
+});
+network.on('click', params => {
+  if (params.nodes.length > 0) {
+    showInfo(params.nodes[0]);
+  } else if (hoveredNodeId === null) {
+    document.getElementById('info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>';
+  }
+});
+
+const searchInput = document.getElementById('search');
+const searchResults = document.getElementById('search-results');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase().trim();
+  searchResults.innerHTML = '';
+  if (!q) { searchResults.style.display = 'none'; return; }
+  const matches = RAW_NODES.filter(n => n.label.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) { searchResults.style.display = 'none'; return; }
+  searchResults.style.display = 'block';
+  matches.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'search-item';
+    el.textContent = n.label;
+    el.style.borderLeft = `3px solid ${n.color.background}`;
+    el.style.paddingLeft = '8px';
+    el.onclick = () => {
+      network.focus(n.id, { scale: 1.5, animation: true });
+      network.selectNodes([n.id]);
+      showInfo(n.id);
+      searchResults.style.display = 'none';
+      searchInput.value = '';
+    };
+    searchResults.appendChild(el);
+  });
+});
+document.addEventListener('click', e => {
+  if (!searchResults.contains(e.target) && e.target !== searchInput)
+    searchResults.style.display = 'none';
+});
+
+const hiddenCommunities = new Set();
+const legendEl = document.getElementById('legend');
+LEGEND.forEach(c => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  item.innerHTML = `<div class="legend-dot" style="background:${c.color}"></div>
+    <span class="legend-label">${c.label}</span>
+    <span class="legend-count">${c.count}</span>`;
+  item.onclick = () => {
+    if (hiddenCommunities.has(c.cid)) {
+      hiddenCommunities.delete(c.cid);
+      item.classList.remove('dimmed');
+    } else {
+      hiddenCommunities.add(c.cid);
+      item.classList.add('dimmed');
+    }
+    const updates = RAW_NODES
+      .filter(n => n.community === c.cid)
+      .map(n => ({ id: n.id, hidden: hiddenCommunities.has(c.cid) }));
+    nodesDS.update(updates);
+  };
+  legendEl.appendChild(item);
+});
+</script>
+<script>
+// Render hyperedges as shaded regions
+const hyperedges = [{"id": "seedance_unified_audiovideo_pipeline", "label": "Seedance 2.0 Unified Multimodal Audio-Video Pipeline", "nodes": ["seedance_2_0", "seedance_multimodal_audiovideo", "seedance_binaural_audio", "seedance_t2v", "seedance_i2v", "seedance_r2v"], "relation": "form", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "topics/video/2604.14148-seedance-2/paper.md"}, {"id": "seedance_evaluation_suite", "label": "SeedVideoBench 2.0 evaluation dimensions", "nodes": ["seedance_seedvideobench_2", "seedance_motion_quality_metric", "seedance_audio_visual_sync", "seedance_narrative_quality", "seedance_cinematographic_lang"], "relation": "participate_in", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "topics/video/2604.14148-seedance-2/paper.md"}, {"id": "clawgui_three_module_framework", "label": "ClawGUI Three-Module Framework", "nodes": ["clawgui_framework", "clawgui_rl", "clawgui_eval", "clawgui_agent", "clawgui_2b"], "relation": "form", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "topics/agents/2604.11784-clawgui/paper.md"}, {"id": "clawgui_rl_stack", "label": "ClawGUI-RL training stack (GiGPO + PRM + Env Manager)", "nodes": ["clawgui_rl", "clawgui_gigpo", "clawgui_prm", "clawgui_environment_manager", "clawgui_mllm_judge", "clawgui_verl"], "relation": "implement", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "topics/agents/2604.11784-clawgui/paper.md"}, {"id": "rationalrewards_parrot_three_phase", "label": "PARROT three-phase pipeline (hindsight, consistency filter, foresight SFT)", "nodes": ["rationalrewards_parrot", "rationalrewards_elbo", "rationalrewards_hindsight_foresight", "rationalrewards_consistency_filter", "rationalrewards_pointwise_projection", "rationalrewards_qwen3_vl_32b"], "relation": "implement", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "topics/multimodal/2604.11626-rationalrewards/paper.md"}, {"id": "rationalrewards_dual_space_optimization", "label": "RationalRewards dual-space optimization (RL + Test-time PT)", "nodes": ["rationalrewards_model", "rationalrewards_generate_critique_refine", "rationalrewards_diffusion_nft", "rationalrewards_lora", "rationalrewards_reward_hacking"], "relation": "form", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "topics/multimodal/2604.11626-rationalrewards/paper.md"}];
+// afterDrawing passes ctx already transformed to network coordinate space.
+// Draw node positions raw — no manual pan/zoom/DPR math needed.
+network.on('afterDrawing', function(ctx) {
+    hyperedges.forEach(h => {
+        const positions = h.nodes
+            .map(nid => network.getPositions([nid])[nid])
+            .filter(p => p !== undefined);
+        if (positions.length < 2) return;
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#6366f1';
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // Centroid and expanded hull in network coordinates
+        const cx = positions.reduce((s, p) => s + p.x, 0) / positions.length;
+        const cy = positions.reduce((s, p) => s + p.y, 0) / positions.length;
+        const expanded = positions.map(p => ({
+            x: cx + (p.x - cx) * 1.15,
+            y: cy + (p.y - cy) * 1.15
+        }));
+        ctx.moveTo(expanded[0].x, expanded[0].y);
+        expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 0.4;
+        ctx.stroke();
+        // Label
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#4f46e5';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(h.label, cx, cy - 5);
+        ctx.restore();
+    });
+});
+</script>
+</body>
+</html>

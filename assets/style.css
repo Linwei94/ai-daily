@@ -97,6 +97,11 @@ section h2::before{content:"";width:3px;height:1.1em;background:var(--gradient);
 .paper-row h3 a{color:var(--fg)}
 .paper-row h3 a:hover{color:var(--accent-2)}
 .paper-row .summary{color:var(--fg-2);font-size:.9rem;margin-bottom:.5rem;line-height:1.6}
+.paper-row .authors{font-size:.82rem;color:var(--fg-2);margin:-.2rem 0 .55rem;line-height:1.5;display:flex;flex-wrap:wrap;gap:.3rem .5rem;align-items:center}
+.paper-row .authors .org{display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .55rem;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;color:var(--fg);font-weight:500;font-size:.78rem}
+.paper-row .authors .org.star{background:linear-gradient(135deg,#fdf3ed,#faf0ec);border-color:#f0d9c8;color:#b8643f}
+.paper-row .authors .org.star::before{content:"★ ";color:#d97757;font-size:.8em}
+.paper-row .authors .ppl{color:var(--fg-3);font-size:.78rem}
 .paper-row .details{color:var(--fg-2);font-size:.85rem;margin-bottom:.5rem;line-height:1.6}
 .paper-row .details strong{color:var(--fg);font-weight:600}
 .paper-row .why{color:var(--fg-3);font-size:.82rem;padding:.5rem .75rem;background:var(--surface-2);border-radius:6px;border-left:3px solid var(--accent);margin-top:.6rem;line-height:1.55}
@@ -135,7 +140,30 @@ footer code{padding:.18rem .45rem;background:var(--surface);border:1px solid var
 
 @media(max-width:768px){
   .container{padding:1.5rem 1rem}
-  header.hero{padding:3rem 1rem 1.5rem}
-  .nav{padding:.75rem 1rem;gap:.85rem;overflow-x:auto}
+  header.hero{padding:2.5rem 1rem 1.25rem}
+  .nav{padding:.75rem 1rem;gap:.7rem;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav .link,.nav .brand{white-space:nowrap;flex-shrink:0}
   .graph-frame,.graph-empty{height:400px}
+  .paper-row{grid-template-columns:auto 1fr;gap:.75rem;padding:.9rem 1rem}
+  .paper-row .rank-col{width:38px}
+  .paper-row .rank-num{width:32px;height:32px;font-size:.9rem}
+  .paper-row h3{font-size:.98rem}
+  .paper-row .summary,.paper-row .details{font-size:.85rem}
+  .paper-row .why{font-size:.78rem}
+  .news li{padding:.75rem .85rem;gap:.7rem}
+  .news .brand-icon{width:28px;height:28px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat .num{font-size:1.7rem}
+  .entries{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  header.hero h1{font-size:1.6rem}
+  .stats{grid-template-columns:1fr 1fr;gap:.6rem}
+  .stat{padding:1rem .75rem}
+  section h2{font-size:1.1rem}
+  .meta-row{font-size:.7rem}
+  .chip{font-size:.68rem;padding:.15rem .45rem}
+  .news strong{font-size:.88rem}
+  .news .desc{font-size:.8rem}
 }

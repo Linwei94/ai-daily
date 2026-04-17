@@ -1,9 +1,19 @@
-# PDFs are large and openly available on arXiv — exclude from repo
+# PDFs are large and openly available on arXiv
 *.pdf
 
-# Local dev artifacts
+# graphify internal scratch (graph/ is the user-facing artifact)
+graphify-out/
+
+# Python
+__pycache__/
+*.pyc
+
+# Editors / OS
 .DS_Store
 *.swp
 .vscode/
 .idea/
-__pycache__/
+
+# Local dev
+node_modules/
+.cache/
