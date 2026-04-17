@@ -1,0 +1,9 @@
+# PDFs are large and openly available on arXiv — exclude from repo
+*.pdf
+
+# Local dev artifacts
+.DS_Store
+*.swp
+.vscode/
+.idea/
+__pycache__/
