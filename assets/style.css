@@ -70,8 +70,12 @@ section h2::before{content:"";width:3px;height:1.1em;background:var(--gradient);
 
 /* news list */
 .news{list-style:none;display:flex;flex-direction:column;gap:.6rem}
-.news li{padding:.85rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:.85rem;align-items:flex-start;transition:border-color .15s,box-shadow .15s}
-.news li:hover{border-color:var(--border-hover);box-shadow:var(--shadow)}
+.news li{padding:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);transition:border-color .15s,box-shadow .15s,transform .15s}
+.news li:hover{border-color:var(--border-hover);box-shadow:var(--shadow);transform:translateY(-1px)}
+.news li > a,.news li > .body-wrap{padding:.85rem 1rem;display:flex;gap:.85rem;align-items:flex-start;color:inherit;text-decoration:none}
+.news li > a:hover strong{color:var(--accent-2)}
+.news li .ext{margin-left:auto;color:var(--fg-3);font-size:.85rem;flex-shrink:0;align-self:center;opacity:.6;transition:opacity .15s,transform .15s}
+.news li > a:hover .ext{opacity:1;transform:translateX(2px);color:var(--accent-2)}
 .news .brand-icon{width:32px;height:32px;border-radius:6px;flex-shrink:0;padding:5px;background:var(--surface-2);object-fit:contain}
 .news .brand-icon[data-brand="anthropic"]{background:#faf0ec}
 .news .brand-icon[data-brand="openai"]{background:#f0f0f0}
